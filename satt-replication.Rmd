@@ -1,0 +1,107 @@
+---
+date: 2016-10-02
+layout: post
+title: Bayesian Replication of SATT threshold paper
+output: html_notebook
+---
+
+# TODO
+- [ ] use multilevel modeling http://mc-stan.org/documentation/case-studies/radon.html
+
+[Aniche et al. postulated](http://www.mauricioaniche.com/2016/08/scam-2016-satt-tailoring-code-metric-thresholds-for-different-software-architectures/) that the *architectural role* a class plays influences the expected value of certain software metrics. In particular, whether a class was a controller, repository, or view should change its CK metric values. For example, since a controller is interacting with views and models, presumably it should be more coupled. Their paper shows that this does seem to be the case. Luckily, nicely, they make the dataset and scripts [available for download](https://mauricioaniche.github.io/scam2016/).
+
+This lends itself to a Bayesian analysis, and since I am learning R-Stan, I thought it would make a nice case study to replicate this. Andrew Gelman covered this type of scenario directly [here](http://andrewgelman.com/2016/03/01/hes-looking-for-a-textbook-that-explains-bayesian-methods-for-non-parametric-tests/), and states "Just model what you want to model directly, and forget about the whole null hypothesis significance testing thing". So that's what I'll do.[^2]
+
+# Data collection
+First, to strictly replicate or not? I could re-use the projects they did, but that might bias me. On the other hand, they've done the hard work, and this way I can directly compare to their results.
+
+Mauricio has provided all his data on Github, so we can load it directly into R (thanks Mauricio!). Then we can check some of the data characteristics. In this replication I will focus on two variables, namely coupling between objects (CBO) and lines of code (LOC) as well as architectural role (role). 
+
+The central RQ of the SATT paper is 
+
+> What differences in metric values distributions does SATT find for common architectural styles such as MVC? 
+
+THey use classes from Spring projects. Spring has 6 types of roles: (Controller,Repository, Service,Entity,Component,Others). Now the question that is being asked to some extent requires a comparison of CBO distribution per architectural role. The SATT finding, after using a classical Wilcoxon non-parametric test, was that role played a significant part in eventual CBO numbers. To wit:
+
+> This coupling metric presents medium and large effect sizes in almost all architectural roles, with the exception of REPOSITORIES and ASYNCTASKS, which present small effect size. We highlight CONTROLLERS, which have a large effect size, and in the boxplot, we can see that their median is higher than that of other classes.
+
+```{r}
+spring = read.csv('/Users/nernst/Documents/projects/satt-replication/data/metrics/spring.csv',header=FALSE)
+colnames(spring) <- c("project", "file", "class", "type", "test", "role", "cbo", "dit", "lcom", "noc", "nom", "rfc", "wmc")
+df <- data.frame(spring)
+df_new <- df[,c("cbo","role")] # new DF with the two variables of interest
+plot(df$role,df$cbo)
+abline(lm(df$cbo~df$role), col="red") # regression line (y~x)
+
+```
+We only need CBO and role, so we discard the rest. From the histogram, it seems pretty clear that the vast majority of the files have a CBO that is quite low or zero.
+Most metrics in source code are fat-tailed, so let's check that out.
+
+```{r}
+library("poweRlaw")
+cbo1 <- cbo + 1 # need to be positive for discrete Powerlaw
+m_pl = displ$new(cbo1)
+est = estimate_xmin(m_pl)
+m_pl$setXmin(est)
+m_ln = dislnorm$new(cbo1)
+est = estimate_xmin(m_ln)
+m_ln$setXmin(est)
+m_pois = dispois$new(cbo1)
+est = estimate_xmin(m_pois)
+m_pois$setXmin(est)
+plot(m_pl)
+lines(m_pl, col=2)
+lines(m_ln, col=3)
+lines(m_pois, col=4)
+# we can also calculate the likelihood that this is power law. See the powerlaw package examples.
+#bs_p = bootstrap_p(m_pl)
+#plot(bs_p)
+#bs_p$p
+```
+
+This is the CDF for the CBO+1 data. The green line shows us the Log-Normal fit, and the red line the PowerLaw. Blue is Poisson. This comes from the poweRlaw package and examples. To me the best fit seems like discrete powerlaw. In other words, the distribution of CBO can be described using an equation of the form $f(x) = x^{-\alpha}$, and the $x_{min}$ for this sample is the one we calculate above. 
+
+Note that the SATT approach was to use non-parametric tests to characterize the differences. This is probably because they knew that CBO was not normally distributed.
+But the beauty of the Bayes approach is that we can *explicitly* model that in the code.
+
+# Modeling
+Mauricio has a nice model implicit in his paper, so let's make that statistically-suitable by expressing it in R-stan.
+Our simple first model will try to predict what the expected coupling between objects (CBO) will be given our prior information.
+
+I take my model format from Statistical Rethinking, \S 4.2
+
+1. Outcome variable: expected CBO for a class, given some role.
+2. Likelihood distribution: Gaussian for linear regression.
+3. Predictor variables: architectural role (Controller,Repository,Service,Entity,Component,Others)
+4. Model parameters alpha, xmin
+
+WHat are we doing here. 
+The first line says CBO (for a given class i) is drawn from a powerlaw distribution with parameters xmin and alpha.
+Then xmin is going to be determined (=, not ~) by a linear model that uses the architectural role to fit the model and
+deterimine x_min (TODO: why xmin and not alpha).
+You may ask why a 'linear model' given we have an exponetial distribution for the CBO?
+This isn't predicting the distirubiton of all CBO, but rather the individual parameter for a
+distrubitinon that this class should fall into. Essentially, we are arguing that CBO has 5 diffferent distributions
+(all powerlaw but with different xmin and alpha), and the role is going to tell us which one.
+
+```{r}
+alist(
+  cbo ~ dpldis(xmin, alpha)
+  xmin = a + b*role
+  a ~ dnorm(??)
+  b ~ dnorm(??)
+  alpha ~ dunif(0,50)
+)
+```
+## The Prior
+The big question here is what to use as a prior. The usual approach is to say we shouldn't expect any differences,
+but this is epistemologically dubious (since we don't really believe this, nor do the experts!).
+I thought I would model it with two priors: a uniform prior, which suggests all classes should be relatively similar on the CK metrics;
+and then a Gaussian, reflecting that the bulk of classes should have nearly identical metrics, but some will be more extreme.
+Let me know what is more reasonable; one of the big wins for the Bayesian framework is that the prior assumptions are made explicit
+and part of the model (and arguable and measurable).
+
+## The likelihood function
+
+
+[^2]: It turns out that this modeling is really hard, which is a FEATURE, since that forces you to think about the underlying sciencing you are trying to do. I think in general, getting a rough confirmation with non-parametric NHST that there is a difference is fine, but getting into multiple comparisons starts to become dodgy (not least because Bonferroni, while important, is merely reducing the p-value for each test, and so questionably scientific to me.
