@@ -16,6 +16,7 @@ sloc = pandas.read_csv('data/metrics/spring-sloc2-java.csv', usecols=['loc','fil
 # inner = drop NaN values
 # N = 59760
 final = spring.merge(sloc, on='file', how='inner')
+
 # final.replace({'role': role_dict}, inplace=True)
 # Strict replication would need to use DataFrame 'spring' and not 'final', due to merge
 cbo_pop = final.loc[:,['test','type','cbo','role','loc']]
@@ -28,10 +29,6 @@ projects = final.project.str.strip().unique()
 proj_num = len(projects)
 project_lookup = dict(zip(projects, range(proj_num)))
 project = final['proj_code'] = final.project.replace(project_lookup).values
-cbo = final.cbo
-final['log_cbo'] = log_cbo = np.log(cbo + 0.1).values
-sloc = final['loc']
-final['log_sloc'] = log_sloc = np.log(sloc + 0.1).values
 role_code = final.role
 
 # reshape the Role field into onehot encoding (binarized)
@@ -42,6 +39,21 @@ binarized = lb.transform(role_code)
 temp = pandas.DataFrame(binarized,columns=roles)
 #using indices assumes equal size
 final = final.merge(temp,left_index=True,right_index=True)
+
+### for testing
+final = final[final.proj_code < 10]
+project = final['proj_code'] = final.project.replace(project_lookup).values
+projects = final.project.str.strip().unique()
+proj_num = len(projects)
+project_lookup = dict(zip(projects, range(proj_num)))
+###
+
+# remove Zeros for log
+epsilon = 0.1
+cbo = final.cbo
+final['log_cbo'] = log_cbo = np.log(cbo + epsilon).values
+sloc = final['loc']
+final['log_sloc'] = log_sloc = np.log(sloc + epsilon).values
 
 pooled_data = """
 data {
@@ -65,29 +77,28 @@ pooled_data_dict = {'N': len(log_cbo),
                     'x': final.controller,
                     'y': log_cbo}
 
-
 compiled_model = pystan.stanc(model_code=pooled_data + pooled_parameters + pooled_model)
 model = pystan.StanModel(stanc_ret=compiled_model)
-# pooled_fit = model.sampling(data=pooled_data_dict, iter=1000, chains=2)
-#
-# pooled_sample = pooled_fit.extract(permuted=True)
-# b0, m0 = pooled_sample['beta'].T.mean(1)
-# # plt.scatter(final.controller, log_cbo)
-# import seaborn as sns
-# ax = sns.violinplot(final.controller, log_cbo)
-# xvals = np.linspace(-0.2, 1.2)
-# # here "0" means "not controller" which is a bit different from the original paper
-# ax.plot(xvals, m0*xvals+b0, 'r--')
+pooled_fit = model.sampling(data=pooled_data_dict, iter=1000, chains=2)
 
-# unpooled
+pooled_sample = pooled_fit.extract(permuted=True)
+b0, m0 = pooled_sample['beta'].T.mean(1)
+# plt.scatter(final.controller, log_cbo)
+import seaborn as sns
+ax = sns.violinplot(final.controller, log_cbo)
+xvals = np.linspace(-0.2, 1.2)
+# here "0" means "not controller" which is a bit different from the original paper
+ax.plot(xvals, m0*xvals+b0, 'r--')
+
+# unpooled *change 10 to 120 in production*
 unpooled_model = """data {
   int<lower=0> N; 
-  int<lower=1,upper=120> project[N];
+  int<lower=1,upper=10> project[N];
   vector[N] x;
   vector[N] y;
 } 
 parameters {
-  vector[120] a;
+  vector[10] a;
   real beta;
   real<lower=0,upper=100> sigma;
 } 
@@ -102,13 +113,20 @@ model {
 }"""
 
 unpooled_data = {'N': len(log_cbo),
-               'project': project+1, # Stan counts starting at 1
+                 'project': project+1,  # Stan counts starting at 1
                  'x': final.controller,
                  'y': log_cbo}
 
-compiled_pooled_model = pystan.stanc(model_code= unpooled_model)
-unpooled_model = pystan.StanModel(stanc_ret=compiled_pooled_model)
+compiled_unpooled_model = pystan.stanc(model_code= unpooled_model)
+unpooled_model = pystan.StanModel(stanc_ret=compiled_unpooled_model)
 unpooled_fit = unpooled_model.sampling(data=unpooled_data, iter=1000, chains=2)
 
-unpooled_sample = unpooled_fit.extract(permuted=True)
-b0, m0 = unpooled_sample['beta'].T.mean(1)
+unpooled_estimates = pandas.Series(unpooled_fit['a'].mean(0), index=project_lookup)
+unpooled_se = pandas.Series(unpooled_fit['a'].std(0), index=project_lookup)
+order = unpooled_estimates.sort_values().index
+
+plt.scatter(range(len(unpooled_estimates)), unpooled_estimates[order])
+for i, m, se in zip(range(len(unpooled_estimates)), unpooled_estimates[order], unpooled_se[order]):
+    plt.plot([i,i], [m-se, m+se], 'b-')
+plt.xlim(-1,120); plt.ylim(-1,4)
+plt.ylabel('CBO estimate');plt.xlabel('Ordered project');
