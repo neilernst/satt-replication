@@ -25,6 +25,8 @@ cbo_pop_controller = cbo_pop.query("test == 0 and type == 'class' and role != 'c
 cbo_controller = cbo_pop.query("role == 'controller'")
 data = pandas.Series(cbo_controller['cbo'])
 final.head()
+
+
 projects = final.project.str.strip().unique()
 proj_num = len(projects)
 project_lookup = dict(zip(projects, range(proj_num)))
@@ -48,12 +50,12 @@ proj_num = len(projects)
 project_lookup = dict(zip(projects, range(proj_num)))
 ###
 
-# remove Zeros for log
-epsilon = 0.1
-cbo = final.cbo
-final['log_cbo'] = log_cbo = np.log(cbo + epsilon).values
-sloc = final['loc']
-final['log_sloc'] = log_sloc = np.log(sloc + epsilon).values
+  # remove Zeros for log
+  epsilon = 0.1
+  cbo = final.cbo
+  final['log_cbo'] = log_cbo = np.log(cbo + epsilon).values
+  sloc = final['loc']
+  final['log_sloc'] = log_sloc = np.log(sloc + epsilon).values
 
 pooled_data = """
 data {

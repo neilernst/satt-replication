@@ -119,7 +119,8 @@ def plot_fits(data: pd.Series, title, xlab):
     ax.set_title(title+u'\n All Fitted Distributions')
     ax.set_xlabel(xlab)
     ax.set_ylabel('Frequency')
-    plt.show()
+    # plt.show()
+    plt.savefig('fit-distr.pdf')
     # Make PDF
     pdf = make_pdf(best_dist, best_fir_paramms)
 
