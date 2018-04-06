@@ -8,12 +8,70 @@
   booktitle = {International Workshop on Emerging Trends in Software Metrics ({WETSoM})}
 }
 
+@webpage{Quarashi,
+Author={Mohammed AlQuraishi},
+url={https://moalquraishi.wordpress.com/2015/03/29/the-state-of-probabilistic-programming/},
+title={The State of Probabilistic Programming},
+year=2015
+}
+
+
+@article{Hassan2017,
+  Abstract = {The popularity of mobile apps continues to grow over the past few
+  years. Mobile app stores, such as the Google Play Store and Apple's App Store
+  provide a unique user feedback mechanism to app developers through the
+  possibility of posting app reviews. In the Google Play Store (and soon in the
+  Apple App Store), developers are able to respond to such user feedback. Over
+  the past years, mobile app reviews have been studied excessively by
+  researchers. However, much of prior work (including our own prior work)
+  incorrectly assumes that reviews are static in nature and that users never
+  update their reviews. In a recent study, we started analyzing the dynamic
+  nature of the review-response mechanism. Our previous study showed that
+  responding to a review often has a positive effect on the rating that is given
+  by the user to an app. In this paper, we revisit our prior finding in more
+  depth by studying 4.5 million reviews with 126,686 responses for 2,328 top
+  free-to-download apps in the Google Play Store. One of the major findings of
+  our paper is that the assumption that reviews are static is incorrect. In
+  particular, we find that developers and users in some cases use this response
+  mechanism as a rudimentary user support tool, where dialogues emerge between
+  users and developers through updated reviews and responses. Even though the
+  messages are often simple, we find instances of as many as ten user-developer
+  back-and-forth messages that occur via the response mechanism. Using a
+  mixed-effect model, we identify that the likelihood of a developer responding
+  to a review increases as the review rating gets lower or as the review content
+  gets longer. In addition, we identify four patterns of developers: 1)
+  developers who primarily respond to only negative reviews, 2) developers who
+  primarily respond to negative reviews or to reviews based on their contents,
+  3) developers who primarily respond to reviews which are posted shortly after
+  the latest release of their app, and 4) developers who primarily respond to
+  reviews which are posted long after the latest release of their app. We
+  perform a qualitative analysis of developer responses to understand what
+  drives developers to respond to a review. We manually analyzed a statistically
+  representative random sample of 347 reviews with responses for the top ten
+  apps with the highest number of developer responses. We identify seven drivers
+  that make a developer respond to a review, of which the most important ones
+  are to thank the users for using the app and to ask the user for more details
+  about the reported issue. Our findings show that it can be worthwhile for app
+  owners to respond to reviews, as responding may lead to an increase in the
+  given rating. In addition, our findings show that studying the dialogue
+  between user and developer can provide valuable insights that can lead to
+  improvements in the app store and user support process.}, Author = {Hassan,
+  Safwat and Tantithamthavorn, Chakkrit and Bezemer, Cor-Paul and Hassan, Ahmed
+  E.}, 
+  Day = {08}, 
+  Doi = {10.1007/s10664-017-9538-9}, 
+  Journal = esem, 
+  Month = {Sep}, 
+  Title = {Studying
+  the dialogue between users and developers of free apps in the Google Play
+  Store},
+   Year = {2017}}
+
 
 @article{Chidamber_1991,
   Author = {Chidamber, Shyam R. and Kemerer, Chris F.},
   Date-Added = {2017-10-02 22:13:41 +0000},
   Date-Modified = {2017-10-02 22:13:55 +0000},
-  Doi = {10.1145/117954.117970},
   Journal = oopsla,
   Publisher = {ACM Press},
   Title = {Towards a metrics suite for object oriented design},
@@ -75,7 +133,6 @@
 @inproceedings{panichella14,
   Author = {A. Panichella and R. Oliveto and A. De Lucia},
   Booktitle = csmr,
-  Doi = {10.1109/CSMR-WCRE.2014.6747166},
    Pages = {164--173},
   Title = {Cross-project defect prediction models: L'Union fait la force},
   Year = {2014},
@@ -95,7 +152,7 @@
 }
 @article{Zhou15regress,
   Author = {M. Zhou and A. Mockus},
-  Doi = {10.1109/TSE.2014.2349496},
+
   Journal = tse,
   Number = {1},
   Pages = {82--99},
@@ -105,15 +162,28 @@
 }
 
 @article{vehtari15,
-  title={Practical Bayesian model evaluation using leave-one-out cross-validation and {WAIC}},
-  author={Aki Vehtari and Andrew Gelman and Jonah Gabry},
-  abstract={Leave-one-out cross-validation (LOO) and the widely applicable information criterion (WAIC) are methods for estimating pointwise out-of-sample prediction accuracy from a fitted Bayesian model using the log-likelihood evaluated at the posterior simulations of the parameter values. LOO and WAIC have various advantages over simpler estimates of predictive error such as AIC and DIC but are less used in practice because they involve additional computational steps. Here we lay out fast and stable computations for LOO and WAIC that can be performed using existing simulation draws. We introduce an efficient computation of LOO using Pareto-smoothed importance sampling (PSIS), a new procedure for regularizing importance weights. Although WAIC is asymptotically equal to LOO, we demonstrate that PSIS-LOO is more robust in the finite case with weak priors or influential observations. As a byproduct of our calculations, we also obtain approximate standard errors for estimated predictive errors and for comparing of predictive errors between two models. We implement the computations in an R package called 'loo' and demonstrate using models fit with the Bayesian inference package Stan.},
-  journal={Statistics and Computing},
-  year=2017, 
-  volume=27, 
-  issue = 5, 
-  pages={1413-1432},
-  DOI={10.1007/s11222-016-9696-4}
+  title={Practical Bayesian model evaluation using leave-one-out
+  cross-validation and {WAIC}}, 
+  author={Aki Vehtari and Andrew Gelman and Jonah
+  Gabry}, 
+  abstract={Leave-one-out cross-validation (LOO) and the widely
+  applicable information criterion (WAIC) are methods for estimating pointwise
+  out-of-sample prediction accuracy from a fitted Bayesian model using the
+  log-likelihood evaluated at the posterior simulations of the parameter values.
+  LOO and WAIC have various advantages over simpler estimates of predictive
+  error such as AIC and DIC but are less used in practice because they involve
+  additional computational steps. Here we lay out fast and stable computations
+  for LOO and WAIC that can be performed using existing simulation draws. We
+  introduce an efficient computation of LOO using Pareto-smoothed importance
+  sampling (PSIS), a new procedure for regularizing importance weights. Although
+  WAIC is asymptotically equal to LOO, we demonstrate that PSIS-LOO is more
+  robust in the finite case with weak priors or influential observations. As a
+  byproduct of our calculations, we also obtain approximate standard errors for
+  estimated predictive errors and for comparing of predictive errors between two
+  models. We implement the computations in an R package called 'loo' and
+  demonstrate using models fit with the Bayesian inference package Stan.},
+  journal={Statistics and Computing}, year=2017, volume=27, issue = 5,
+  pages={1413-1432}, DOI={10.1007/s11222-016-9696-4}
 }
 
 @inproceedings{Posnett:2011,
@@ -234,7 +304,6 @@ year=2016
 
 @article{JORGENSEN2003,
   Author = {Magne J{\o}rgensen and Ulf Indahl and Dag Sj{\o}berg},
-  Doi = {https://doi.org/10.1016/S0164-1212(03)00066-9},
   Journal = jss,
   Number = {3},
   Pages = {253 - 262},
@@ -258,14 +327,22 @@ year=2016
 
 @article{Sorensen16,
     author =    {Sorensen, Tanner AND Hohenstein, Sven AND Vasishth, Shravan },
-    journal =   {The Quantitative Methods for Psychology},
-    publisher = {TQMP},
-    title =     {Bayesian linear mixed models using Stan: A tutorial for psychologists, linguists, and cognitive scientists},
+    journal =   {The Quantitative Methods for Psychology}, publisher = {TQMP},
+    title =     {Bayesian linear mixed models using Stan: A tutorial for
+    psychologists, linguists, and cognitive scientists}, 
     year =      {2016},
-    volume =    {12},
-    number =    {3},
-    pages =     {175-200},
-    abstract =  {With the arrival of the R packages nlme and lme4, linear mixed models (LMMs) have come to be widely used in experimentally-driven areas like psychology, linguistics, and cognitive science. This tutorial provides a practical introduction to fitting LMMs in a Bayesian framework using the probabilistic programming language Stan. We choose Stan (rather than WinBUGS or JAGS) because it provides an elegant and scalable framework for fitting models in most of the standard applications of LMMs. We ease the reader into fitting increasingly complex LMMs, using a two-condition repeated measures self-paced reading study.},
+    volume =    {12}, 
+    number =    {3}, pages =     {175-200}, 
+    abstract =  {With
+    the arrival of the R packages nlme and lme4, linear mixed models (LMMs) have
+    come to be widely used in experimentally-driven areas like psychology,
+    linguistics, and cognitive science. This tutorial provides a practical
+    introduction to fitting LMMs in a Bayesian framework using the probabilistic
+    programming language Stan. We choose Stan (rather than WinBUGS or JAGS)
+    because it provides an elegant and scalable framework for fitting models in
+    most of the standard applications of LMMs. We ease the reader into fitting
+    increasingly complex LMMs, using a two-condition repeated measures
+    self-paced reading study.}, 
     doi =       {10.20982/tqmp.12.3.p175}
 }
 
